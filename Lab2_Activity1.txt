@@ -1,0 +1,45 @@
+
+Part 1
+
+# Create md5 hash
+openssl dgst -md5 secret.txt
+
+# Create sha256 hash
+openssl dgst -sha256 secret.txt
+
+# Create HMAC using sha256
+openssl dgst -sha256 -hmac "sup3r_s3cret_k3y" secret.txt
+
+# Create HMAC using sha512
+openssl dgst -sha512 -hmac "sup3r_s3cret_k3y" secret.txt
+
+# Generate RSA private key
+openssl genrsa -out private.pem
+
+# Sign using RSA
+openssl rsautl -sign -inkey private.pem -in secret.txt -out secret.sig
+
+# Create the hash of signed message
+openssl dgst -md5 secret.sig
+
+# Given in question
+openssl dgst -sha256 -sign private.pem -out data.sig secret.txt
+
+
+# Create the hash of signed message
+openssl dgst -md5 data.sig
+
+Part 2
+
+# Create 3 public keys from the given private keys
+openssl rsa -in client1.pem -pubout -out Pclient1.pem
+openssl rsa -in client2.pem -pubout -out Pclient2.pem
+openssl rsa -in client3.pem -pubout -out Pclient3.pem
+
+# verify signature
+openssl dgst -sha256 -verify keys/Pclient1.pem -signature secret.sign secret.txt
+openssl dgst -sha256 -verify keys/Pclient2.pem -signature secret.sign secret.txt
+openssl dgst -sha256 -verify keys/Pclient3.pem -signature secret.sign secret.txt
+
+# Get details of 3rd key
+./rsa-utility.py keys/client3.pem

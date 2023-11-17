@@ -1,0 +1,96 @@
+
+Part 1
+# Script to check hash collision(Weak collision)
+################################
+import hashlib
+result = ""
+with open("permissions.txt" , "rb") as file1:
+    bytes = file1.read()
+    readable_hash = hashlib.md5(bytes).hexdigest()
+#    print(readable_hash);
+    result = readable_hash[:4]
+    print(result)
+
+
+with open("evil-permissions.txt" , "rb") as file2:
+    bytes = file2.read()
+    spaces = 0
+    result2 = ""
+    bytes2 = b""
+    while(result != result2):
+        spaces = spaces + 1
+        sp = spaces*" "
+        bytes2 = sp.encode('ascii') + bytes
+        readable_hash2 = hashlib.md5(bytes2).hexdigest()
+        result2 = readable_hash2[:4]
+        print(result2, spaces)
+    print(bytes2)
+    f = open("sample.txt", "wb")
+    f.write(bytes2)
+    f.close()
+    print(result2)
+##################################
+
+
+Part 2
+# Script to check Hash collision (Strong collision)
+
+import hashlib
+result1 = ""
+result2 = ""
+list1 = []
+list2 = []
+list11 = []
+list22 = []
+bytes1 = b""
+bytes11 = b""
+bytes2 = b""
+bytes22 = b""
+spaces1 = 0
+spaces2 = 0
+r = 400
+with open("permissions1.txt" , "rb") as file1:
+    bytes1 = file1.read()
+    for x in range(r):
+        spaces1 = spaces1+1
+        sp = spaces1*" "
+        bytes11 = sp.encode('ascii') + bytes1
+        readable_hash = hashlib.md5(bytes11).hexdigest()
+        result1 = readable_hash[:4]
+        if result1 == "b046":
+            list1.append(result1+ "_" + str(spaces1))
+            f = open("per1.txt", "wb")
+            f.write(bytes11)
+            f.close()
+        list11.append(result1)
+#    print(result)
+    #print(list1)
+
+with open("permissions2.txt" , "rb") as file2:
+    bytes2 = file2.read()
+    spaces2 = r
+    for x in range(r):
+        spaces2 = spaces2 + 1
+        sp = spaces2*" "
+        bytes22 = sp.encode('ascii') + bytes2
+        readable_hash2 = hashlib.md5(bytes22).hexdigest()
+        result2 = readable_hash2[:4]
+        if result2 == "b046":
+            list2.append(result2+"_"+str(spaces2))
+            f = open("per2.txt", "wb")
+            f.write(bytes22)
+            f.close()
+        list22.append(result2)
+        #print(result2, spaces)
+        #print(list2)
+#common_list = set(list11).intersection(list22)
+#print(common_list)
+
+    
+#print(bytes2)
+#f = open("sample.txt", "wb")
+#f.write(bytes2)
+#f.close()
+#print(result2)
+
+

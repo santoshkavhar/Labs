@@ -1,0 +1,377 @@
+
+### Lab 1
+### Activity 1
+
+
+
+
+
+Part 1
+
+# Create md5 hash
+openssl dgst -md5 secret.txt
+
+# Create sha256 hash
+openssl dgst -sha256 secret.txt
+
+# Create HMAC using sha256
+openssl dgst -sha256 -hmac "sup3r_s3cret_k3y" secret.txt
+
+# Create HMAC using sha512
+openssl dgst -sha512 -hmac "sup3r_s3cret_k3y" secret.txt
+
+# Generate RSA private key 
+openssl genrsa -out private.pem
+
+# Sign using RSA 
+openssl rsautl -sign -inkey private.pem -in secret.txt -out secret.sig
+
+# Create the hash of signed message
+openssl dgst -md5 secret.sig
+
+# Given in question
+openssl dgst -sha256 -sign private.pem -out data.sig secret.txt
+
+
+# Create the hash of signed message
+openssl dgst -md5 data.sig
+
+Part 2
+
+# Create 3 public keys from the given private keys
+openssl rsa -in client1.pem -pubout -out Pclient1.pem
+openssl rsa -in client2.pem -pubout -out Pclient2.pem
+openssl rsa -in client3.pem -pubout -out Pclient3.pem
+
+# verify signature
+openssl dgst -sha256 -verify keys/Pclient1.pem -signature secret.sign secret.txt
+openssl dgst -sha256 -verify keys/Pclient2.pem -signature secret.sign secret.txt
+openssl dgst -sha256 -verify keys/Pclient3.pem -signature secret.sign secret.txt
+
+# Get details of 3rd key 
+./rsa-utility.py keys/client3.pem
+
+
+
+
+
+### Activity 2
+
+
+
+Part 1
+# Script to check hash collision(Weak collision)
+################################
+import hashlib
+result = ""
+with open("permissions.txt" , "rb") as file1:
+    bytes = file1.read()
+    readable_hash = hashlib.md5(bytes).hexdigest()
+#    print(readable_hash);
+    result = readable_hash[:4]
+    print(result)
+
+
+with open("evil-permissions.txt" , "rb") as file2:
+    bytes = file2.read()
+    spaces = 0
+    result2 = ""
+    bytes2 = b""
+    while(result != result2):
+        spaces = spaces + 1
+        sp = spaces*" "
+        bytes2 = sp.encode('ascii') + bytes
+        readable_hash2 = hashlib.md5(bytes2).hexdigest()
+        result2 = readable_hash2[:4]
+        print(result2, spaces)
+    print(bytes2)
+    f = open("sample.txt", "wb")
+    f.write(bytes2)
+    f.close()
+    print(result2)
+##################################
+
+
+Part 2
+# Script to check Hash collision (Strong collision)
+
+import hashlib
+result1 = ""
+result2 = ""
+list1 = []
+list2 = []
+list11 = []
+list22 = []
+bytes1 = b""
+bytes11 = b""
+bytes2 = b""
+bytes22 = b""
+spaces1 = 0 
+spaces2 = 0 
+r = 400 
+with open("permissions1.txt" , "rb") as file1:
+    bytes1 = file1.read()
+    for x in range(r):
+        spaces1 = spaces1+1
+        sp = spaces1*" "
+        bytes11 = sp.encode('ascii') + bytes1
+        readable_hash = hashlib.md5(bytes11).hexdigest()
+        result1 = readable_hash[:4]
+        if result1 == "b046":
+            list1.append(result1+ "_" + str(spaces1))
+            f = open("per1.txt", "wb")
+            f.write(bytes11)
+            f.close()
+        list11.append(result1)
+#    print(result)
+    #print(list1)
+
+with open("permissions2.txt" , "rb") as file2:
+    bytes2 = file2.read()
+    spaces2 = r 
+    for x in range(r):
+        spaces2 = spaces2 + 1 
+        sp = spaces2*" "
+        bytes22 = sp.encode('ascii') + bytes2
+        readable_hash2 = hashlib.md5(bytes22).hexdigest()
+        result2 = readable_hash2[:4]
+        if result2 == "b046":
+            list2.append(result2+"_"+str(spaces2))
+            f = open("per2.txt", "wb")
+            f.write(bytes22)
+            f.close()
+        list22.append(result2)
+        #print(result2, spaces)
+        #print(list2)
+#common_list = set(list11).intersection(list22)
+#print(common_list)
+
+    
+#print(bytes2)
+#f = open("sample.txt", "wb")
+#f.write(bytes2)
+#f.close()
+#print(result2)
+
+
+
+
+
+## Activity 1
+
+ Preamble: Agent X has moved to public key systems. He came up with the following procedure to communicate with Agent Z. 
+   1. Generate a symmetric key and encrypt it with Agent Z’s public key (C1 is the resulting ciphertext).
+   2. Encrypt the message with the symmetric key (C2 is the resulting ciphertext). 
+   3. Send C1 and C2 to Agent Z.
+  
+One fine day Agent Z went to a location and attempted shooting Mr. Gabbar. Much to his horror, Agent Z realized it was a trap and managed to narrowly escape. Agent Z is mad and claims he went there based on Agent X’s instructions but Agent X claims he never sent those instructions. What is going on?
+
+Based on the procedure being followed by Agent X in communicating with Agent Z, conjecture as to what could have gone wrong and how the enemy exploited the situation.
+
+It looks like a case of missing integrity/authentication. A fix for this is either MACs or digital signatures. We will explore hashes (which are also used in keyed hashes and signatures), followed by MACs and digital signatures. Guidance for all is given at the end.
+
+
+Part 1: Hashes, MACs, and Digital Signatures
+-------------------------------------------- Problem Statement ------------------------------------------------------
+You are given a secret.txt file in "/home/labDirectory/part1/" folder. You have to do the following for this part of the activity.
+ 1. Create MD5, and SHA256 hash of the file using openssl
+ 2. Create SHA256, and SHA512 MACs of this file using openssl. Use "sup3r_s3cret_k3y" as the key.
+ 3. Create a "private.pem" file in "/home/labDirectory/part1/" directory and sign the secret.txt file with that private.pem key. Once you sign it, create md5sum of the signature.
+
+**NOTE**: The name and location of private.pem must match as suggested in point 3.
+------------------------------------------- Submission Details ---------------------------------------------------
+Submit the md5 and sha256 hashes, sha256 and sha512 MACs and md5 hash of the document signature in flag.txt file. Make sure to follow the format of flag.txt file.
+---------------------------------------------------------------------------------------------------------------------------
+
+Part-2: Verification of the Signatures
+---------------------------------------------------- Problem Statement ----------------------------------------------
+You are given "secret.txt" and "secret.sign" in "/home/labDirectory/part2" directory and also 3 client private keys in "/home/labDirectory/part2/keys" directory. You need to find out which one of the private keys was used to sign the secret.txt file using openssl.
+------------------------------------------------- Submission Details ---------------------------------------------------
+Once you identify the key used for signing the secret.txt file, use "rsa-utility.py" given in "/home/labDirectory/part2" to get details about the private key, and submit p (Prime 1), q (Prime 2), and d (Decryption key) in metadata.txt available within "/home/labDirectory/part2" directory in the format suggested in the metadata.txt.
+
+------------------------------------------------- Guidance  ---------------------------------------------------
+openssl dgst command can be used to generate the hash value for a file. To see the manuals, you can type man openssl and man dgst. Usage: openssl dgst dgsttype filename 
+Replace the dgsttype with a specific one-way hash algorithm, such as -md5,-sha1,-sha256 etc. Try at least 3 different algorithms, the supported one-way hash algorithms can be known by typing man openssl.
+    
+To generate keyed hashes, you can use -hmac option. The following example generates a keyed hash for a file using the HMAC-MD5 algorithm. The string following the -hmac option is the key. openssl dgst -md5 -hmac "abcdefg" filename. Generate a keyed hash using HMAC-MD5, HMAC-SHA256, and HMAC-SHA1. Vary the key length as well. 
+
+To generate digital signatures, follow these procedures:
+To Sign - To sign a file using OpenSSL you need a private key. If you don’t have an RSA key pair, generate one. You can use the following commands to generate the signature of a file: openssl dgst -sha256 -sign private.pem -out data.sig data
+To Verify - Verification requires the public key and knowledge of the hashing algorithm that was used. You can use the following command to verify the signature: openssl dgst -sha256 -verify public.pem -signature data.sig data
+
+
+
+## Activity 2
+
+Preamble: Agent X has installed a spy Agent Z in the enemy organization. This spy works as a secretary under Mr. Gabbar. Mr. Gabbar currently trusts Agent Z as a secretary (and not for anything that involves high security) and Agent X wants to exploit this trust to get a signed document from Gabbar that gives permission to Agent Z to enter a high-security area (and once there steal some documents). Agent Z cannot just sneak in such a document (like shown in bollywood movies) and get Gabbar’s signature. Gabbar reads everything carefully before signing. And note we are dealing with digital signatures, not some pen based signature. And Gabbar signs a hash of messages and not the message directly (he is smarter than Mogambo).
+
+------------------------------------------ Problem Statement -------------------------------------
+Exercise 1: Weak collision property
+
+You decided to go with the following strategy. You have a routine “office order” (permissions.txt in "/home/labDirectory/part1" folder) that Agent Z can make Gabbar sign. You are also given an "evil-permission.txt" (in "/home/labDirectory/part1" folder) which has an extra permission in it to give high-security entry to Agent Z. Your task is to now manipulate "evil-permissions.txt" in such a way that it's MD5 hash'es first 16 bits (4 characters) match to "permissions.txt" file's MD5 hash's first 16 bits (4 characters)
+
+This essentially boils down to breaking the weak collision property of a hash.
+
+**NOTE**: There will be a special line in permissions file which has statement relating to "Unique Bytes Dump". Do not change this line as it is important for uniqueness of your lab work.
+
+Guidance:
+- We will use the brute-force method to see how long it takes to break this property.
+- Most of the hash functions are quite strong against the brute-force attack and it will take us years to break them. To make the task feasible, we will reduce the length of the hash value to 16 bits. Use the first 16 bits of MD5 hash function for this lab.
+- Keep on modifying spaces in evil-permissions.txt and recalculating its hash till it matches (first 16 bits) with that of permissions.txt. (Write a program/script to do this automatically in loop)
+- If you want to reset the files given to you, you can use "reset.sh" the bash script available in "/home/labDirectory/part1" directory. 
+	
+Exercise 2: Strong Collision Property
+
+Darn! Above is taking too long to break. You want your approach to be more efficient. You heard about the birthday problem and decided to adopt that strategy in your solution. So, you decided to create versions of permissions1.txt as well and find any version of permissions1.txt whose hash matches any version of permissions2.txt. This essentially boils down to breaking the strong collision property of a hash.
+
+Guidance:
+You have been given permissions1.txt and permissions2.txt in "/home/labDirectory/part2/" which contains some content which was originally meant to be sent. You task is to make changes to both permissions1.txt and permissions2.txt in such a way that they differing only in spaces and when MD5 hash is calculated from them, they have same first 16 bits in their MD5 hash. (Write a program/script to do this automatically in loop)
+- If you want to reset the files given to you, you can use "reset.sh" the bash script available in "/home/labDirectory/part2" directory.
+
+**NOTE**: There will be a special line in permissions file which has statement relating to "Unique Bytes Dump". Do not change this line as it is important for uniqueness of your lab work.
+
+Reference: https://www.researchgate.net/profile/Ganesh_Gupta4/publication/271704029_What_is_Birthday_attack/links/54cfbdcc0cf24601c0958a1e/What-is-Birthday-attack.pdf
+
+----------------------------------------- Submission Details -------------------------------------------
+- Weak Collision: evil-permissions.txt(different from permissions.txt) such that its hash matches in first 16 bit to that of permissions.txt given.
+- Strong Collision: permissions1.txt and permissions2.txt  (permissions1.txt is the modified one, should differ in spaces from that provided), such that they are different in content but have same first 16 bit of hash.
+      
+
+
+## Activity 3
+
+        Activity 3:
+
+Preamble: We never got to know the name of the boss of Agent X till now, let's remedy it; his name is Albert Pinto. Given how many heads rolled and how many were hanged, drawn and quartered, you should know by now that Albert is very short tempered, with little patience for errors (his employees often comment behind his back “Albert Pinto Ko Gussa Kyoon Aata Hai”). Now Albert oversees many departments and has many people working under him in a hierarchy. Now at the bottom are the field-agents (leaves in the tree) who report to different managers, but sometimes also have to share information with each other. But since these agents don't know each other directly, they are not too comfortable trusting/dealing with others (which is understandably given the business they are in, where small mistakes can lead to rolling heads). How can these agents prove to each other that they are trustworthy and they are all indeed working for the same cause under the leadership of Albert? Mr. Albert wants to know (much like our news anchor Mr. Arnab Goswami)?
+
+Well, this is Agent X's and hence your headache now. Get cracking with a solution!
+
+PKI is the way forward. So, the idea is all these agents will get a digital certificate signed by Albert (after due background checks) and then when Agent X wants some info from Agent Y, the following steps are followed:
+1. All agents know only the public key of Albert (another advantage as opposed to maintaning
+public keys of so many agents)
+2. Agent X shares his certificate with Agent Y. This certificate includes the public key of Agent
+X, which is signed by Albert
+3. Agent Y verifies this certificate with the public key of Albert.
+4. If verified, Agent Y will use Agent X's public key and send the confidential information.
+(If Agent X wants to send info to Agent Y, procedure is similar except he will ask for Agent Y's certificate first; verify it and then send info confidentially).
+
+
+This involves setting up the following:
+Albert (Boss): Become a Certificate Authority via self signed certificate
+Agent: 
+ - Create public/private key pair
+ - Generate a “CSR” request to get a certificate
+Albert: Sign Agent's certificate
+
+
+Follow below guidance and  submit the ca.key, ca.cert, agent.key and agent.cert for evaluation.
+
+  	
+Guidance:
+Step1: Make Albert a CA
+1. A Certificate Authority (CA, root) is a trusted entity that issues digital certificates. Albert will become the root CA and will generate a root CA’s certificate, which is self-signed.
+2 .A directory called “boss” is already created and available for you for this purpose in “/home/labDirectory/”. It has a configuration file along with various sub-folders needed by the configuration file. Browse around.
+3. Create the private key of Albert using the “openssl genrsa” command you used in earlier activities. The name of the file must be "ca-key.pem".
+4. Enter the directory and run the following command to generate the self-signed certificate for the CA: “openssl req -new -x509 -key ca-key.pem -out ca-cert.pem -config openssl.cnf”
+          - Enter required information. The information should be as followed:
+                 - Country Name: IN
+                 - State or Province Name: Maharashtra
+                 - Locality Name: Mumbai
+                 - Organization Name: iitb-cia
+                 - Organizational Unit Name: cse
+                 - Common Name: www.iitb-cia.com
+                 - email address: it can be anything
+5. File ca-key.pem contains the CA’s keys
+6. File ca-cert.pem is the certificate which contains its public key
+7. You can explore the key via “openssl x509 -in ca-key.pem -text” and the certificates via “openssl x509 -in ca-cert.pem -text”
+
+Step2: Generate Agent public/private key and ask Albert to sign
+1. A directory called agent is available for you for this purpose in “/home/labDirectory/”. Enter the directory.
+2. Within it, create keys via “openssl genrsa” (covered before). The name of the key must be "agent-key.pem"
+3. To generate a Certificate Signing Request (CSR) which includes the agent’s public key and identity information, use “openssl req -new -key agent-key.pem -out agent-csr.pem -config openssl.cnf”
+          - Enter required information. The information should be as followed:
+                 - Country Name: IN
+                 - State or Province Name: Maharashtra
+                 - Locality Name: Mumbai
+                 - Organization Name: iitb-cia
+                 - Organizational Unit Name: cse
+                 - Common Name: www.iitb-cia.com
+                 - email address: it can be anything
+                 - DO NOT ADD any challenge password and other company name if asked.
+4. Note openssl.conf (same file as in step1) is already present in the folder.
+      Above command is quite similar to the one we used in creating self-signed certificate for the CA. The main difference is the-x509 option. Without it, the command generates a request; with it, the command generates a self-signed certificate.
+- Explore the csr via “openssl req -in agent-csr.pem -text”
+- This agent-csr.pem is sent to the CA, who after necessary background checks will issue a certificate. We will mimic this action by copying agent's CSR to the boss's directory. Do that.
+
+
+Step 3: Albert sign's agent's key
+- Albert can turn the CSR into an X509 certificate (agent-cert.pem), using “openssl ca -in
+agent-csr.pem -out agent-cert.pem -cert ca-cert.pem -keyfile ca-key.pem -config openssl.cnf” (Adjust file paths accordingly).
+
+Step 4: Agent examines received certificate
+- Copy agent-cert.pem from Boss's folder to agent's (Agent got his certificate at last)
+- Examine the certificate via “openssl x509 -in agent-cert.pem -text”
+- Verify that the certificate works. For this copy ca.crt from boss’s folder to the agent’s folder (all agents need root CA's certificate anyways) and then type  “openssl verify -CAfile ca-cert.pem agent-cert.pem” 
+- Can you alter the certificate?  Change Subject name to some other name via hex editor and verify.
+
+
+
+
+
+
+
+## Activity 4
+
+ Preamble:
+Agent X's boss Albert is impressed with the way Agent X is managing security concerns of his
+organization (well, one sows, another reaps, that's life!). The boss wants yet another problem
+tackled. Periodically he has some information that he needs to share with thousands of field agents. He could potentially send individual messages encrypted with their public key and signed by his private key but this is turning out to be very cumbersome. What can be done?
+
+In Part-1 of the lab:
+     You decide that you can create a secure website and post this information there. You know TLS/SSL is the way to go since it helps agents mutually authenticate the server.
+
+In Part-2 of the lab:
+     You decide that you can create a secure website and post this information there and these field agents can login with passwords everyday and check for new updates and retrieve the information. You know TLS/SSL is the way to go since it helps agents mutually authenticate the server.
+
+Part-1 of the activity involves:
+       - Setting up HTTPS server using apache2
+Part-2 of the activity involves:
+       - Analyzing the HTTPS traffic using wireshark
+       - Decrypting HTTPS traffic with the SSL server’s SSL key logs with the help of wireshark.
+
+Part-1: Convert a HTTP Server to HTTPS server
+
+How to do this, guidance below. But once you set up the server, access the flag on the server and submit it in flag.txt file
+
+Guidance:
+- To host a https server, the server needs a certificate (we saw how to get one already in another activity). “ca-cert.pem”, "webserver-cert.pem" and "webserver-key.pem" are the relevant files here. We have created these files for you in following locations:
+           - ca-cert.pem : “/home/labDirectory/part1/boss/ca-cert.pem”
+           - webserver-cert.pem: “/home/labDirectory/part1/webserver/webserver-cert.pem”
+           - webserver-key.pem: “/home/labDirectory/part1/webserver/webserver-key.pem”
+- Edit the "/etc/apache2/sites-available/ssl-serv.conf" file where in “SSLCACertificateFile” variable put path of the CA certificate, in "SSLCertificateFile" variable put the path of the server certificate and in "SSLCertificateKeyFile" variable put the path of the server key. Save the ssl-serv.conf file and exit from it. (Use nano/vim editors for this purpose)
+- Now run the following commands: A). a2ensite ssl-serv B) service apache2 start or service apache2 restart (if apache is already running)
+           - a2ensite  is  a  script  that  enables  the specified site within the apache2  configuration
+           - “service apache2 start”, starts the server
+- Now access the webserver on https://localhost:443/ and the flag1 will be found at https://localhost:443/flag1.txt. This is a publicly available information which anyone without any issues can access.
+This is the private flag only accessible with valid client certificate signed by CA.
+**SUBMISSION DETAILS:** Submit the flag in “/home/labDirectory/part1/flag.txt”
+
+**EXTRA**: Apache also allows you to have authentication using client certificate which is signed by the same CA. Feel free to explore this feature on your own. A good resource for this can be found at https://stuff-things.net/2015/09/28/configuring-apache-for-ssl-client-certificate-authentication/
+
+Part-2: Wireshark to decrypt and explore HTTPS traffic
+
+While you can and in fact should collect your own wireshark trace while the above curl is happening and examine your own https connection, we have instead given you an already collected trace. This captures the interaction between a browser and a https server, wherein some username/password was exchanged. 
+
+Notice that when you open the trace in wireshark, everything is encrypted and you cannot determine the username and password.  Nonetheless, examine the trace carefully and identify below specified detail and enter in the “/home/labDirectory/part2/flag.txt” file.
+
+If you have somehow managed to get the pre-master key, you can actually decrypt the traffic and analyse it further. For this, we have provided the pre-master key logs for that traffic in "/home/labDirectory/part2/" folder. Your task is to use the pre-master key and decrypt the HTTPS traffic capture using Wireshark. Once you have done it successfully, obtain the username and password embedded in the trace, login with the same username and password at “https://localhost:4443/” and submit the password you found and the flag in the “/home/labDirectory/part2/flag.txt” file.
+
+**NOTE**: After pressing the Attempt button, wait for some time (max 1 minute) for the container to get set up.
+**WireShark Installation:** Since we are working with wireshark, install it from https://www.wireshark.org/download.html.
+**Decrypting SSL/TLS traffic with wireshark:** Here is a good reference on how to do it: https://www.comparitech.com/net-admin/decrypt-ssl-with-wireshark/. If you don't see SSL option in protocols submenu as shown in above material, find TLS instead. Both works the same way here.
+
+--------------------------------------- Submission Details ----------------------------------------------
+Submit the following in the flag.txt
+- password found 
+- Flag found after logging in
+      

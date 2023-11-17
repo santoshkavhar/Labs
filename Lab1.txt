@@ -1,0 +1,212 @@
+### Lab 1
+## Activity 1
+Preamble: Agent X has to share some documents and images periodically with other agents. Knowing the pitfalls of classical cryptography (remember Mr. Mogambo from earlier exercises!), he decided to go with modern cryptography, specifically symmetric key ciphers. He needs help encrypting and decrypting messages.
+We will first specify the activity you need to perform. Guidance on how to perform the activity is given further below.
+
+------------------------------ AES Encryption ------------------------------
+
+Don’t worry, Agent X is not going to ask you to implement a symmetric key cipher 😊 Agent X is using a software that relies on openssl library for providing confidentiality. This is a good “crypto” library that, among many other things, implements symmetric ciphers also. Let su check it out.
+
+Use the "secret.txt" file given in “/home/labDirectory/part1/” folder to encrypt the data in "secret.txt" file as per below.
+	- Key = 55110062015112014aaff2d1f
+	- IV = 01020304055040302010 (If needed)
+	- Encryption Algorithm: AES-128 with ECB and CTR mode
+- Encryption Algorithm: AES-256 with CBC, CFB and OFB mode
+- Create different output files (i.e. ciphertext as per above), and then create the md5sum of the encrypted files and submit the md5sum (total 5, see submission details below). Note, you can create md5sum of the output file output.bin via: "md5sum output.bin"
+- PLEASE DO NOT CHANGE ANY TEXT IN "SECRET.TXT" FILE AS IT WILL AFFECT FINAL MD5SUM TOO
+
+Submission Details:
+- In "flags.txt" file, put all the computed md5sum in separate lines (5 in total)
+
+**GUIDANCE**
+- openssl enc is the command to encrypt/decrypt a file. This is what is of interest to us now. You can type "man enc" to know more. See this as well https://wiki.openssl.org/index.php/Enc.
+- An example usage is openssl enc -aes-128-cbc -e -in plain.txt -out cipher.bin -K 00112233445566778889aabbccddeeff -iv 0102030405060708; where you are asking to encrypt the input plain.txt using AES algorithm with 128 bit key in CBC block mode. The cipher text is to be written in cipher.bin. The key (-K) and IV (-iv) to be used are also specified, expressed in hexadecimal.
+
+--------------------------------------AES Decryption---------------------------------------------
+Go to a different folder, “/home/labDirectory/part2/” for this exercise. You are given a ciphertext “/home/labDirectory/part2/secret.bin”. Here, we will see how to decrypt the same. You know the algorithm used is AES. You also found the key and the IV used (given below). But you don’t know which block mode has been used. Using this information, decrypt the ciphertext and submit the plaintext in the form of a flag in the flag.txt file in the appropriate folder.
+	- Key: 11152569842abcfdd5116
+	- IV: 102030506070ddff
+	- Encryption Algorithm: AES
+	- Block Modes: It can be any of the CBC, ECB, CFB, OFB, CTR
+
+Submission Details:
+- Put the flag you found after decrypting the secret in "flags.txt" file
+      
+
+
+
+## Activity 2
+
+ Same IV, Different Messages:
+
+Preamble: With your kind help, Agent X has decided to use AES-128 in OFB mode and things have been going well for a while until one day Agent X walks in instyle (imagine Rajnikanth’s entrance) but mad. He blames you for the mess he is in. An important document which he sent using AES-128-OFB had leaked and his boss is threatening to hang, draw and quarter him (see https://en.wikipedia.org/wiki/Hanged,_drawn_and_quartered :-).
+Please help save Agent X by debugging the issue before he visits the same punishment on you :-)
+You know Agent X is not using ECB, so there should ideally be no leakage. You ask about IV. Bingo, Agent X is using the same IV for all messages. You tell him that this is not a good idea. Agent X is not convinced by your explanation. He claims that in his case, the plain text does not repeat since he sends different images/docs each time. So, using the same IV should be safe still. Help him understand why this is still a bad idea by coming up with an example.
+
+The scenario is, Agent X is using OFB blockmode, and using the same IV every time for encryption. You have a plaintext P1 and its encrypted text C1, and also you have C2 (a new encrypted text). Show Agent X how you (or an attacker) can derive the plain text P2 in this case. Your goal is to obtain and submit this plain text (P2).  The details of the IV, P1, C1 and C2 are present in "metadata.txt" file in the labdirectory.
+- **Hint:** See how OFB mechanism works more closely
+- The P1, C1, and C2 provided in metadata.txt file are in hexadecimal form. However, the Flag (Plaintext P2) that needs to be submitted must be in ASCII text form.
+
+Submission Details:
+- Submit the flag (plaintext P2) you found, in "flags.txt" file available in your labdirectory.
+
+
+
+
+
+
+## Activity 3
+
+        RSA Key Verification
+
+Preamble: Life has been going well for Agent X, thanks to your help. But when is life ever a bed of roses? Agent X gets information from many field agents. He meets them once (after tremendous effort to keep the meeting secret) and shares a secret key with them (he maintains a separate key for each agent). But managing so many keys is getting overwhelming. Further, some of these agents are careless and tend to lose keys. Meeting them again, passing on new keys etc, i.e the overall key management is turning out to be a major pain in the a$$ in execution. He needs help again!
+
+You know asymmetric key algorithms can help in above key management. All agents just need Agent X's public key, which is not even a secret, even enemies can know it. Let us explore this new cipher in some detail.
+
+------------------------------------------- Problem Statement -------------------------------------------------
+- Given a public key and multiple private keys, your task is to identify the correct private key that pairs with the given public key. The goal here is to understand the key structure.
+
+------------------------------------------- Submission Details -------------------------------------------------
+- Once correct key is identified, use the "rsa-utility.py" available in your labdirectory to get primes(p,q), modulus(n), totient value(phi) and encryption-decryption keys(d,e). But submit only the p, q, and d as obtained from the stdout (after running the python script) in the metadata.txt file.
+
+------------------------------------------- Useful Commands --------------------------------------------------
+- Create RSA private key:
+   - openssl genrsa -out <outfile> <bits>
+- Create RSA Public key:
+   - openssl rsa -in <private-key> -pubout -out <outfile>
+- Encryption using RSA:
+   - openssl pkeyutl -encrypt -in <plain-text-file> -out <out-file> -pubin -inkey <public-key>
+- Decryption using RSA:
+   - openssl pkeyutl -decrypt -in <cipher-text-file> -out <outfile> -inkey <private-key>
+- Verify if given public key and private key pair is valid or not:
+   - echo "Verified" | openssl pkeyutl -encrypt -pubin -inkey <public-key> | openssl pkeyutl -decrypt -inkey <private-key>
+- Extract the details(primes,modulus,public key, private key) from private key file:
+   - openssl rsa -in <private-key> -text -noout
+ 
+
+
+
+
+## Activity 4
+RSA Encryption and Decryption
+
+We have explored only the keys earlier, we will explore encryption and decryption here.
+
+Part-1: Encryption
+------------------------------ Problem Statement ----------------------------
+- Navigate to "/home/labDirectory/part1/" and work in this directory.
+- Given the private key, you need to do the following:
+   - Create a public key using the private key given to you.
+   - Encrypt the secret.txt file using newly created public key and store it in "encrypted.txt"
+   - Create md5sum of the output file and submit the md5sum in the flags.txt file
+- **NOTE**: The name of the encrypted text file must be "encrypted.txt" and it must be located in "/home/labDirectory/part1/"
+- **EXTRA Question**: Try the encryption multiple times and create md5sum of it, you will notice different md5sums every time, meaning the cipher text changes on every encryption. Can you figure out why is this happening?
+
+Part-2: Decryption
+------------------------------ Problem Statement ----------------------------
+- Navigate to "/home/labDirectory/part2/" and work in this directory.
+- Given a cipher text file and its  associated keys (public and private) in “/home/labDirectory/part2/keys/” , decrypt the cipher text.
+
+submit the flag (plaintext) in the flags.txt file
+
+------------------------------------------- Useful Commands --------------------------------------------------
+- Create RSA private key:
+   - openssl genrsa -out <outfile> <bits>
+- Create RSA Public key:
+   - openssl rsa -in <private-key> -pubout -out <outfile>
+- Encryption using RSA:
+   - openssl pkeyutl -encrypt -in <plain-text-file> -out <out-file> -pubin -inkey <public-key>
+- Decryption using RSA:
+   - openssl pkeyutl -decrypt -in <cipher-text-file> -out <outfile> -inkey <private-key>
+- Verify if given public key and private key pair is valid or not:
+   - echo "Verified" | openssl pkeyutl -encrypt -pubin -inkey <public-key> | openssl pkeyutl -decrypt -inkey <private-key>
+- Extract the details(primes,modulus,public key, private key) from private key file:
+   - openssl rsa -in <private-key> -text -noout
+      
+
+
+
+
+## Activity 5
+       ECDH Shared Key operation
+
+Agent X is having more problems! What is new you ask?
+
+Agen X sometimes receives a huge amount of data from his agents and the decryption operation is taking too much time with RSA. Also his agents all have dud devices (only in Bond movies agents have access to fancy stuff, alas real life is different! ) and these are not able to handle the key strength required that Agent X insists they use. He wants the process speeded up.  Help him achieve this. 
+
+You heard of ECC algorithms which are faster than RSA and using them, there is also a nice way to derive shared keys, which make the overall operation very fast. Let us explore this to help Agent X.
+
+---------------------- Problem Statement ---------------------
+
+Agent Z wants to send a message to Agent X. For this, Agent Z will generate a shared key with her private key and Agent X’s public key (see Guidance for more details).
+
+- Given "public-secp256k1.key" a public key of Agent X, you (on behalf of Agent Z) need to do the following:
+  - Create your own public-private key pair and name them exactly "private.key" and "public.key" using openssl.
+  - Use openssl to create a shared key with name "sharedKey.pem"
+  - Once "sharedKey.pem" is created, wait for 1 minute and a "cipher.txt" file will appear.
+  - Use the sharedKey.pem and decrypt the ciphertext using aes-256-ctr with IV as 102030506070ddff. Also here encryption is done using base64 encoded key. See the guidance below for this.
+
+- **NOTE:** Since there might be case where the file is available in the container but VLab editor doesn't show it, If you don't see "cipher.txt" file in VLab editor window after 1-2 minutes have been passed, look at the location "/home/labDirectory/" folder contents from terminal inside the container.
+---------------------- Submission Details ---------------------
+- Collect the flag available after decrypting the cipher text and submit it in flags.txt file.
+ 
+- NOTE: If you don't see the required files in your labdirectory, then go back try reattempting the labs.
+
+
+---------------------- Guidance ----------------------
+Elliptic-curve Diffie–Hellman (ECDH) is a key agreement framework that allows two parties, each having an elliptic-curve public–private key pair, to establish a shared secret. We will explore this here.
+
+Elliptic Curve Cryptography (ECC) is extensively used within public key encryption, including with TLS, Bitcoin, Ethereum etc. We will first use OpenSSL to create a public-private key pair. For this we will first generate a random private key (priv), and then generate a public key point (i.e. private multiplied by G), using a generator (G) which is a generator point on a given selected elliptic curve. Then we will also see how to derive a shared secret between two parties who have EC key pairs.
+We will assume below that Alice wants to communicate with Bob using ECDH, the terminology used is as per this.
+1. To first see what are the curves available, use “openssl ecparam -list_curves”
+2. Let us first generate a private key for Alice. We need to specify which curve we will use to generate relevant size key. In this example, we have used secp256k1.
+“openssl ecparam -name secp256k1 -genkey -out alicepriv.pem”
+Use “cat alicepriv.pem” to view your key.
+3. If we want to see what are the ECC parameters associated with this key, you can use “openssl ecparam -in alicepriv.pem -text -param_enc explicit -noout”
+This specifies the prime defining the finite field, the coefficients a, b of the curve, the generator (both the x- and y-coordinates of the point are packed into a single string), the order or size q of the generated group, and the cofactor also.
+4. Let us now generate the public key based on the private key via “openssl ec -in alicepriv.pem -pubout -out alicepub.pem”. You can checkout the key via “cat alicepub.pem”.
+5. The “pem” format has a lot of extra stuff (e.g. BEGIN …) and also it is base-64 encoded. It does not really tell what the actual public and private keys are. To find this you can use “openssl ec -in alicepriv.pem -text -noout”. 6. You need to repeat steps 2 and 4 for generating Bob’s private and public key.
+7. Now that we have the relevant keys, we can derive a shared key using the below command. This is from the perspective of Alice. “openssl pkeyutl -derive -out abkey1.pem -inkey alicepriv.pem -peerkey bobpub.pem” The abkey1.pem is a shared symmetric key that Alice derived based on its private key and Bob’s public key. This is the key she will use to encrypt messages sent to Bob using any of the symmetric key algorithms like AES etc (e.g. using openssl enc).
+8. You can also do the same as above but from Bob’s perspective. Name the key abkey2.pem
+9. You can check via “xxd” if the keys abkey1.pem and abkey2.pem are the same. They should be, if you did things correctly!
+10. To encrypt with base64 encoded key file use below:
+ - `openssl enc -<algo> -base64 -k $(base64 shared.pem) -iv <iv> -e -in <input-file> -out <output-file>`
+ - These are important in cases where key files and their bytes are a bit weird and not easily readable.
+      
+
+
+
+
+
+
+
+
+## Activity 6
+
+    Abusing Modular Arithmetic to exfiltrate secrets.
+
+-----------------------------------------------------------------------------------------------------
+Problem Statement:
+- There is an application running on port 9001, which provides a feature wherein the application provides you with rsa public key pair (e,n), and asks for cipher text to be decrypted by the private key of the application.
+- The flow of application is:
+ - You are given (e,n) by the application when you connect to it.
+ - The application then asks for cipher text in long integer format. Here as a user you can encrypt some text , let's say "Hello World!" using (e,n) pair and submit it on application to get it decrypted by the application.
+- The application however also has a secret cipher-text that is shown to you. You can't decrypt it since you don't have the private key of the application. You can bruteforce it though, but it will take forever.
+- You could pass the same cipher text to the application, but the application itself is self aware and won't decrypt it's own secret text.
+- Your task is to trick the application into decrypting its own cipher text.
+- **EXTRA**: Use “netcat” as tool to communicate to port 9001.
+	- “nc -nv 127.0.0.1 9001”
+- **HINT:** Modular Arithmetic used in RSA can be helpful. Look at how to forge a new ciphertext which includes already available ciphertext.
+- **NOTE:** We have provided utility scripts in "/home/labDirectory/utils", which you can use as follows:
+ - "encryptor.py": To create encrypted long number from plain text. Here you will need to change hard-coded n, and e inside the script itself. Usage: python3 encryptor.py "Example Text"
+ - ascii-to-long-converter.py: To convert any plain text into long number. Usage: python3 ascii-to-long-converter.py "Example Text"
+ - long-to-ascii-converter.py: To convert any long number to equivalent ascii plain text. Usage: python3 long-to-ascii-converter.py 21499996864371468652163463284
+
+-----------------------------------------------------------------------------------------------------
+Submission Details:
+- Once you trick the application to reveal its secret, you will get a flag, submit it in "flags.txt" file in your labdirectory.
+     
+
+
+
+ 

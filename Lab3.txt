@@ -1,0 +1,98 @@
+### Lab 3
+
+## Activity 1
+
+Sniffing
+
+  Preamble: Preamble:
+One fine day, a gentleman whom you have not seen before walks into your room. The gentleman asks if you know Agent X. You are now beginning to panic, maybe this guy is an enemy agent out to get you. As the man advances towards you, you start to back off. And bang! this is what happens next https://i.dailymail.co.uk/i/gif/2017/11/giphy.gif
+
+Oh man! You can't believe your eyes. The mask Tom Cruise sports in “Mission Impossible” is
+indeed real! 
+
+Getting to the point, Agent X tells that he is going undercover for a few weeks in Gabbar's
+organization. Some insider within the organization has given him some juicy information which he wants to act on. He managed to get a job as a data entry operator. He may not be able to login to high security machines, but he sure will be given access to a machine that is plugged into the LAN.
+
+Information agent X has is as follows: A machine (let us call it A) will periodically contact a central server (call it B) which maintains a list of whitelisted IPs. The job of A is to get this info and configure another  machine (say C) to ensure C responds only to machines that are part of the whitelist. When it responds, it shares a key which they can use to access sensitive information. The IP whitelist and key can keep changing, hence the above mechanism.
+
+He needs your help to understand what he needs to do in the enemy organization to be able to talk with C and get the key from it.
+
+
+Exercise:
+
+Your first job is to sniff traffic going on the LAN, identify machines A and B, and recover the password to be able to login to B to get the whitelisted IPs.
+
+- Create a python3 script using scapy library to sniff the HTTP data. (You will find interesting details in the data you have sniffed)
+- Get the password, login to the server and capture the flag
+- Also note down the whitelisted IPs and the protocols they need to use, this will be needed for the next exercise.
+
+----------------------- Submission Details --------------------------------------------
+Submit the flag and password in /home/labdirectory/flag.txt.
+  	
+Guidance:
+- https://scapy.readthedocs.io/en/latest/usage.html
+- In a real world, we would have used multiple machines interacting with each other, but in this lab since we do not yet have multi container support, everything is via localhost interface.
+- We have given a sample scapy script sniff.py available at /home/labDirectory/sniff.py. This script sniffs ICMP packets. Run the script and sniff the localhost; at the same time ping the localhost also. See if your script captures the ICMP packets of ping.
+        - To work with sniffing scripts you also need to find out the interface name you want to sniff packets from. Here since we will be sniffing only localhost connections, the interface will be loopback.
+         - Run `ifconfig` command to see all the interfaces, and put the name of the interface at the suitable place in your sniffer script.
+- Extend the script to achieve the intended task.
+      
+
+
+
+## Activity 2
+
+Preamble: Agent X needs to move on to the next stage of the operation. He got the whitelist, great! But he now needs to pretend to be one of the whitelisted machines to contact C. But where even is machine C? 
+
+  ----------------------- Part-1: Port Scanning using Nmap ---------------------------------
+
+- The whitelist reveals not just IP addresses but also the protocol to use. Use nmap to find out what all services are running. 
+- Your scan should run for all TCP ports and for UDP ports in the range [1500-2500].
+- Once you complete port scanning, you will find out that there is a TCP port in range [40000,60000] open for you which is essentially the port where you will connect to and answer some questions to get the flag.
+
+----------------------- Submission Details --------------------------------------------
+- There is an nmap-challenge waiting for you in range [40000, 60000] of TCP ports, find the port, connect to it, answer questions asked there and get a flag.
+           - To connect to the open port use netcat: `nc -nv localhost <port>`
+- Submit the flag in /home/labdirectory/flag.txt.
+
+
+Guidance:
+- https://securitytrails.com/blog/nmap-commands
+- https://www.sans.org/blog/sans-pen-test-cheat-sheet-nmap-v1-1/
+
+
+--------------------- Part2- Spoofing ----------------------------
+One of the IP addresses in the white list is associated with a UDP port. What this means is this IP should connect to some UDP service. Nmap thankfully has revealed only 1 UDP port.
+
+So your job now is to spoof a UDP packet with the src IP as the one listed in the whitelist on the web-application and send it to the port you discovered and see what reply you get. Note you also need to sniff the traffic in parallel to snooping to find the reply from the server. The reply will contain the flag.
+
+Submit the flag found in /home/labdirectory/flag.txt.
+
+Guidance:
+- **NOTE:** For spoofing (in spoof.py) use only the ethernet/wifi ip, typically the one with interface eth0, ensXX, wlan0, or equivalent. Do not use localhost or 127.0.0.1 since with scapy it won't work 
+- The sample scapy script spoof.py is available in /home/labDirectory/spoof.py which generates a spoofed ICMP packet. Run it, along with a sniffer (also available in /home/labDirectory/sniff.py) to check if you can see the packet.
+     - To test them, open 2 terminal windows.
+     - Run the sniff.py script in one of the terminals to start sniffing the ICMP packets. [MAKE THE CHANGES ACCORDINGLY IN THE SCRIPT]
+     - On another terminal start the spoof.py script to spoof ICMP requests.  [MAKE THE CHANGES ACCORDINGLY IN THE SCRIPT]
+     - Now go to the terminal where you started sniff.py, and you will see ICMP requests coming in.
+- Now extend the script to perform the intended action.
+      
+
+
+
+## Activity 3
+
+Preamble: Agent X is worried that his spoofed IP will be removed from the whitelist before he can complete his task, he therefore wants to bring the server (machine B) down till the time he finishes his job. 
+
+(TCP syn flood attack is best. However DOS is hard to showcase in our lab settings. So, we will do some simulation of it via TCP connection flood. In real-world, TCP connection flood  has to be done at some very high rate, but here we will not use rate but a simple count, without worrying about time. Once you reach a certain count of TCP connections, assume the server cannot support any more connections and hence cannot share the whitelist. where you keep establishing TCP connections one after the other, the moment you hit some limit, but this is bit harder to achieve in our lab setting. So, we will try a TCP connection flood instead)
+
+  	--------------------- TCP Connect Flood --------------------------------
+Write a python script  to establish many connections with the server. Once you cross a certain threshold of connections, the server will crash, which is mimicked by the server revealing a flag on the webpage instead of the whitelist. 
+
+The username:password of the web-application is admin:S3curePassw0rd
+
+Submit the flag found in /home/labdirectory/flag.txt.
+
+Guidance:
+- The maximum connection limit is set to be random between [5,10]. Since the maximum limit cap is small enough, one can manually connect to the service via netcat parallelly. But we encourage you to create a python script which simultaneously creates connections for you.
+        - Checkout this forum post for guidance for creating the script: https://stackoverflow.com/questions/10810249/python-socket-multiple-clients
